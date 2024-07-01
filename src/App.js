@@ -1,31 +1,29 @@
 import Inicio from './Components/Inicio'
 import './App.css';
-import Login from './Components/Login';
+import {Auth0Provider} from '@auth0/auth0-react'
 import {Link, Router, BrowserRouter, Routes, Route } from 'react-router-dom'
+import LoginButton from './Components/loginButton';
+import LogoutButton from './Components/LogoutButton';
+import Profile from './Components/Profile';
+import {useAuth0} from '@auth0/auth0-react'
+
+
+
 function App() {
+  const {isLoading, error } = useAuth0();
   return (
-    <BrowserRouter className="App">
-      <header className="App-header">
-        
-        <p>
-          Accuratio
-        </p>
-        <p>
-        Power Bi Embebbed
-        </p>  
-        
-        
-        <Login/>
-        <Link to={'/Inicio'} onClick={'Inicio.js'}>
-        Inicio 
-        </Link>
-      </header>
-    <Routes>
-    <Route path="/" element={<Inicio />} />
-    </Routes>
-
-
-    </BrowserRouter>
+    <main>
+    {error && <p>Error de Autenticación</p>}
+    {!error && isLoading && <p>Cargando...</p>}
+    {!error && !isLoading && (
+      <>
+      <LoginButton/>
+      <LogoutButton/>
+      <Profile/>
+      </>
+    )}
+    
+    </main>
     
   );
 }
