@@ -9,14 +9,33 @@ const Profile = () => {
 
     useEffect(() => {
         if (isAuthenticated && user) {
-            // Realiza la solicitud al servidor Express
+            // Realiza la solicitud al servidor Express para obtener el iframe
             fetch(`http://localhost:3002/iframe/${user.sub}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.iframe) {
                         setIframe(data.iframe);
                     } else {
-                        setError('Iframe no encontrado para este usuario');
+                        // No se encontró el iframe, intenta crear el usuario
+                        fetch(`http://localhost:3002/adduser`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                username: user.name,
+                                sub: user.sub
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(newUser => {
+                            console.log('Usuario creado:', newUser);
+                            setError('Iframe no encontrado, usuario creado en la base de datos.');
+                        })
+                        .catch(err => {
+                            console.error('Error al crear el usuario:', err);
+                            setError('Error al crear el usuario');
+                        });
                     }
                 })
                 .catch(err => {
@@ -50,3 +69,4 @@ const Profile = () => {
 };
 
 export default Profile;
+
