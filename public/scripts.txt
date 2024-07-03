@@ -1,0 +1,46 @@
+-- Table: public.accounts
+
+-- DROP TABLE IF EXISTS public.accounts;
+
+CREATE TABLE IF NOT EXISTS public.accounts
+(
+    user_id integer NOT NULL DEFAULT nextval('accounts_user_id_seq'::regclass),
+    username character varying(50) COLLATE pg_catalog."default",
+    sub character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    empresa character varying(50) COLLATE pg_catalog."default",
+    CONSTRAINT accounts_pkey PRIMARY KEY (user_id),
+    CONSTRAINT accounts_empresa_key UNIQUE (empresa),
+    CONSTRAINT accounts_sub_key UNIQUE (sub),
+    CONSTRAINT accounts_username_key UNIQUE (username)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.accounts
+    OWNER to postgres;
+
+-------------------------------------
+
+-- Table: public.dashboards
+
+-- DROP TABLE IF EXISTS public.dashboards;
+
+CREATE TABLE IF NOT EXISTS public.dashboards
+(
+    dashboard_id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    empresa character varying(55) COLLATE pg_catalog."default",
+    password character varying(55) COLLATE pg_catalog."default",
+    iframe character varying(500) COLLATE pg_catalog."default",
+    user_id integer NOT NULL,
+    CONSTRAINT dashboards_pkey PRIMARY KEY (dashboard_id),
+    CONSTRAINT accounts_dashboard_fk FOREIGN KEY (user_id)
+        REFERENCES public.accounts (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.dashboards
+    OWNER to postgres;
