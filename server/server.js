@@ -4,27 +4,14 @@ const pool = require("./database");
 const app = express();
 
 // Consultas SQL
-// const getAllUsuariosQuery = 'SELECT * FROM accounts';
 const getIframeBySubQuery = 'SELECT iframe FROM accounts WHERE sub = $1';
 const insertUserQuery = 'INSERT INTO accounts (username, sub) VALUES ($1, $2) RETURNING user_id';
-const getUserBySubQuery = 'SELECT * FROM accounts WHERE sub = $1'; // Definir la consulta para obtener un usuario por 'sub'
+const getUserBySubQuery = 'SELECT * FROM accounts WHERE sub = $1';
+const getDashboardsBySubQuery = 'SELECT d.iframe FROM accounts a LEFT JOIN dashboards d ON a.user_id = d.user_id WHERE a.sub = $1 ';
 
 // Middleware
 app.use(express.json());
 app.use(cors());
-
-// Ruta para obtener todos los usuarios
-// app.get("/adduser", async (req, res) => {
-//     try {
-//         const usuarios = await pool.query(getAllUsuariosQuery);
-//         console.log('Consulta exitosa. Resultados:', usuarios);
-//         console.log('Usuarios:', usuarios.rows);
-//         res.json(usuarios.rows);
-//     } catch (err) {
-//         console.error('Error al obtener usuarios:', err);
-//         res.status(500).send('Error al obtener usuarios');
-//     }
-// });
 
 // Ruta para obtener el iframe basado en el sub del usuario
 app.get("/iframe/:sub", async (req, res) => {
@@ -42,6 +29,25 @@ app.get("/iframe/:sub", async (req, res) => {
         res.status(500).send('Error al obtener iframe');
     }
 });
+
+//  ruta para obtener dashboards basado en el sub del usuario
+app.get("/dashboards/:sub", async (req, res) => {
+    const { sub } = req.params;
+    try {
+        const result = await pool.query(getDashboardsBySubQuery, [sub]);
+
+        if (result.rows.length > 0) {
+            // Responder con un JSON que contenga todos los dashboards
+            res.json(result.rows); 
+        } else {
+            res.status(404).json({ message: 'No se encontraron dashboards para el sub proporcionado' });
+        }
+    } catch (err) {
+        console.error('Error al obtener dashboards:', err);
+        res.status(500).send('Error al obtener dashboards');
+    }
+});
+
 
 // Ruta para insertar un nuevo usuario
 app.post("/adduser", async (req, res) => {
@@ -69,4 +75,5 @@ app.post("/adduser", async (req, res) => {
 });
 
 app.listen(3002, () => console.log("Servidor funcionando en el puerto: http://localhost:3002"));
+
 
